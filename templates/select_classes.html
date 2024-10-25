@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกประเภทโมเดล</title>
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #fff;
+            border: 2px solid #ff66cc;
+            border-radius: 20px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff66cc;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .model-select {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .model-select h2 {
+            color: #ff66cc;
+            font-size: 1.8em;
+            border-bottom: 2px solid #ff66cc;
+            display: inline-block;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+
+        .output-section {
+            text-align: center;
+            border: 2px solid #ff66cc;
+            border-radius: 15px;
+            padding: 20px;
+            background-color: #fff;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .output-section h2 {
+            color: #ff66cc;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+
+        .output-section img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .danger-alert {
+            text-align: center;
+            color: red;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .date-time {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        .date-time p {
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Add responsive behavior */
+        @media (max-width: 768px) {
+            .model-options {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .model-options label {
+                margin-bottom: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>เลือกประเภทโมเดล</h1>
+        <div class="model-select">
+            <h2>เลือกประเภทของโมเดล:</h2>
+            <form action="/select_classes" method="POST">
+                <div class="model-options">
+                    <input type="radio" name="class_option" value="option1" id="option1" required>
+                    <label for="option1">Option 1</label>
+                    <input type="radio" name="class_option" value="option2" id="option2">
+                    <label for="option2">Option 2</label>
+                    <input type="radio" name="class_option" value="option3" id="option3">
+                    <label for="option3">Option 3</label>
+                </div>
+                <button type="submit" style="padding: 10px 20px; background-color: #ff66cc; color: white; border: none; border-radius: 5px; cursor: pointer;">เริ่มตรวจจับ</button>
+            </form>
+        </div>
+
+        <div class="output-section">
+            <h2>ผลลัพธ์การตรวจจับ:</h2>
+            <img src="{{ url_for('video_feed') }}" alt="Video Feed">
+            <div class="date-time">
+                <p>เวลาปัจจุบัน: {{ current_time }}</p>
+            </div>
+        </div>
+
+        {% if dangerous %}
+        <div class="danger-alert">
+            <p>🚨 การตรวจจับอันตราย! 🚨</p>
+            <img src="{{ dangerous_image_path }}" alt="Dangerous Detection" style="max-width: 100%; height: auto; border-radius: 10px;">
+        </div>
+        {% endif %}
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PPE Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>PPE Detection Application</h1>
+    <input type="file" id="fileInput" accept="image/*">
+    <button id="uploadBtn">Upload</button>
+
+    <div id="result">
+        <h2>Results:</h2>
+        <h3>Original Image:</h3>
+        <img id="originalImage" src="" alt="Original Image" style="display:none;">
+        <h3>Processed Image:</h3>
+        <img id="processedImage" src="" alt="Processed Image" style="display:none;">
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        document.getElementById('uploadBtn').onclick = async () => {
+            const fileInput = document.getElementById('fileInput');
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            const response = await fetch("/predict/", {
+                method: "POST",
+                body: formData,
+            });
+
+            const result = await response.json();
+
+            if (result.status === "success") {
+                document.getElementById('originalImage').src = `data:image/jpeg;base64,${result.Original Image}`;
+                document.getElementById('originalImage').style.display = 'block';
+                document.getElementById('processedImage').src = `data:image/jpeg;base64,${result.Processed Image}`;
+                document.getElementById('processedImage').style.display = 'block';
+                document.getElementById('output').innerText = JSON.stringify(result.Bounding Boxes, null, 2);
+            } else {
+                document.getElementById('output').innerText = `Error: ${result.error}`;
+            }
+        };
+    </script>
+</body>
+</html>

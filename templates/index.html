@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Selection</title>
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #fff;
+            border: 2px solid #ff66cc;
+            border-radius: 20px;
+            box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #ff66cc;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        .model-select {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .output-section {
+            text-align: center;
+            border: 2px solid #ff66cc;
+            border-radius: 15px;
+            padding: 20px;
+            background-color: #fff;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .model-message {
+            background-color: #e0ffe0;
+            border: 2px solid green;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            color: green;
+            margin-bottom: 20px;
+        }
+        .danger-alert {
+            background-color: #ffcccc;
+            border: 2px solid red;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            color: red;
+            margin-bottom: 20px;
+        }
+        .danger-alert img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        .date-time {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+        .date-time p {
+            font-weight: bold;
+            color: #333;
+        }
+        .status-message {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px 0;
+        }
+        .logs-section {
+            margin-top: 30px;
+            border-top: 2px solid #ff66cc;
+            padding-top: 20px;
+        }
+        .logs-section table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .logs-section th, .logs-section td {
+            border: 1px solid #ff66cc;
+            padding: 10px;
+            text-align: left;
+        }
+        .logs-section th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>เลือก Model</h1>
+
+        <div class="model-select">
+            <form action="/select_classes" method="POST">
+                <input type="radio" name="class_option" value="option1" id="option1" required>
+                <label for="option1">ห้องเชื่อม</label>
+
+                <input type="radio" name="class_option" value="option2" id="option2">
+                <label for="option2">ห้องเครื่องจักร</label>
+
+                <input type="radio" name="class_option" value="option3" id="option3">
+                <label for="option3">ที่สูง</label>
+                <button type="submit">เริ่มตรวจจับ</button>
+            </form>
+        </div>
+
+        {% if selected_model %}
+        <div class="model-message">
+            <p>ใช้โมเดล: {{ selected_model }}</p>
+        </div>
+        {% endif %}
+
+        <div class="output-section">
+            <h2>ผลลัพธ์การตรวจจับ:</h2>
+            <img src="{{ url_for('video_feed') }}" alt="Video Feed">
+        </div>
+
+        
+
+        <div class="date-time">
+            <p id="currentDateTime">วันที่และเวลา: --:--</p>
+        </div>
+
+        <!-- Logs Section -->
+        <div class="logs-section">
+            <h2>ข้อมูลการตรวจจับทั้งหมด:</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>เวลา</th>
+                        <th>สถานะ</th>
+                        <th>ภาพ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in detection_logs %}
+                    <tr>
+                        <td>{{ log[1] }}</td>  <!-- Timestamp -->
+                        <td>{{ log[2] }}</td>  <!-- Status -->
+                        <td>
+                            {% if log[3] %}
+                            <img src="{{ log[3] }}" alt="Log Image" style="max-width: 100px; height: auto;">
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Script to display current date and time
+        function updateDateTime() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+            const formattedTime = now.toLocaleString('th-TH', options);
+            document.getElementById("currentDateTime").innerText = "วันที่และเวลา: " + formattedTime;
+        }
+
+        setInterval(updateDateTime, 1000);
+
+        // Function to fetch danger status from the server
+        function fetchDangerStatus() {
+            fetch('/danger_status')
+                .then(response => response.json())
+                .then(data => {
+                    const dangerMessage = data.danger_message;
+                    const dangerImagePath = data.dangerous_image_path;
+
+                    // Update the danger status message
+                    document.querySelector('.status-message p').innerText = dangerMessage;
+
+                    // If dangerous, update the image
+                    if (data.dangerous && dangerImagePath) {
+                        const dangerAlert = document.querySelector('.danger-alert');
+                        dangerAlert.innerHTML = `
+                            <p>🚨 การตรวจจับอันตราย! 🚨</p>
+                            <img src="${dangerImagePath}" alt="Dangerous Detection">
+                        `;
+                        dangerAlert.style.display = 'block';
+                    } else {
+                        // Hide the danger alert if not dangerous
+                        document.querySelector('.danger-alert').style.display = 'none';
+                    }
+                });
+        }
+
+        // Fetch danger status every 2 seconds
+        setInterval(fetchDangerStatus, 2000);
+    </script>
+</body>
+</html>
